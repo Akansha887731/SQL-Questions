@@ -1,58 +1,87 @@
-<h1>Second Highest Salary</h1>
+SQL Problem: Find the Second Highest Distinct Salary
+This document outlines the problem and provides the optimized SQL solution to find the second highest distinct salary from the Employee table, ensuring that the result is a single-row, single-column output that returns NULL if the salary does not exist.
 
-Table: Employee
+Table Schema
+Column Name
 
-| Column Name | Type |
-| id          | int  |
-| salary      | int  |
+Type
 
-id is the primary key (column with unique values) for this table.
-Each row of this table contains information about the salary of an employee.
- 
+id
 
-Write a solution to find the second highest distinct salary from the Employee table. If there is no second highest salary, return null (return None in Pandas).
+int
 
-The result format is in the following example.
+salary
 
- 
+int
 
-Example 1:
+id is the primary key.
 
-Input: 
-Employee table:
+Examples
+Example 1: Second Highest Salary Exists
 
-| id | salary |
-| 1  | 100    |
-| 2  | 200    |
-| 3  | 300    |
+id
 
-Output: 
+salary
 
-| SecondHighestSalary |
-| 200                 |
+1
 
-Example 2:
+100
 
-Input: 
-Employee table:
+2
 
-| id | salary |
-| 1  | 100    |
+200
 
-Output: 
+3
 
-| SecondHighestSalary |
-| null                |
+300
 
+Output:
 
-<h1>Answer:</h1>
+SecondHighestSalary
 
-```sql
-select (select e.salary as SecondHighestSalary from (
-select salary, DENSE_RANK() over (order by salary desc) as emp_rank 
-from Employee
-) as e
-where e.emp_rank = 2
-limit 1)
- as SecondHighestSalary;
-```
+200
+
+Example 2: No Second Highest Salary
+
+id
+
+salary
+
+1
+
+100
+
+Output:
+
+SecondHighestSalary
+
+null
+
+Optimal SQL Solution (Using DENSE_RANK() with Scalar Subquery)
+This solution uses DENSE_RANK() to rank distinct salaries and wraps the result in a scalar subquery with an aggregate function (MAX) to guarantee a single result row, even when multiple employees share the second highest salary.
+
+SELECT
+    (SELECT MAX(salary)
+     FROM (
+         -- Step 1: Rank all salaries in descending order
+         SELECT
+             salary,
+             -- DENSE_RANK assigns the same rank to ties (duplicate salaries)
+             -- and ensures the next rank is consecutive.
+             DENSE_RANK() OVER (ORDER BY salary DESC) as emp_rank 
+         FROM
+             Employee
+         ) AS e
+     -- Step 2: Filter for the second rank
+     WHERE
+         e.emp_rank = 2
+    ) AS SecondHighestSalary;
+
+Key Logic Points:
+DENSE_RANK(): Correctly handles duplicate salary entries (e.g., three people earning $300 are all rank 1), ensuring the next highest unique salary gets rank 2.
+
+WHERE e.emp_rank = 2: Isolates the second highest distinct salary value(s).
+
+SELECT MAX(salary): When multiple employees share the second highest salary (e.g., two people earn $200), the MAX() function collapses these identical values into a single result, preventing the inner query from returning multiple rows.
+
+Outer Scalar Subquery: SELECT ( ... ) AS SecondHighestSalary guarantees a single final output row. If the inner query returns no rows (no second salary), the final output is automatically set to NULL.
