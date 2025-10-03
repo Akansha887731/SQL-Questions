@@ -15,7 +15,7 @@ Input (Employee Table):
 | 2  | 200    |
 | 3  | 300    |
 
-### Output:
+Output:
 | SecondHighestSalary |
 | :------------------ |
 | 200                 |
