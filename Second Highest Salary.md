@@ -54,6 +54,7 @@ Output:
 
 <h1>Answer:</h1>
 
+```sql
 select (select e.salary as SecondHighestSalary from (
 select salary, DENSE_RANK() over (order by salary desc) as emp_rank 
 from Employee
@@ -61,3 +62,4 @@ from Employee
 where e.emp_rank = 2
 limit 1)
  as SecondHighestSalary;
+```
